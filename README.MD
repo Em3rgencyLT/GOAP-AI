@@ -16,6 +16,10 @@ Add grunt to the project
 
 `npm install grunt --save-dev`
 
+Add underscoreJS to the project
+
+`npm install underscore --save-dev`
+
 
 Add grunt-screeps to the project
 

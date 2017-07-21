@@ -4,7 +4,8 @@ var constants = {
     ACTION_FIND_ACTIVE_SOURCE : 'findActiveSource',
     ACTION_HARVEST_SOURCE : 'harvestSource',
     ACTION_DEPOSIT_ENERGY_TO_SPAWN_OR_EXTENSION : 'depositEnergyToSpawnOrExtension',
-    ACTION_FIND_NON_FULL_SPAWN_OR_EXTENSION : 'findNonFullSpawnOrExtension'
+    ACTION_FIND_NON_FULL_SPAWN_OR_EXTENSION : 'findNonFullSpawnOrExtension',
+    ACTION_BUILD_WORKER: 'buildWorker',
 }
 
 function findActiveSourceAction() {
@@ -55,6 +56,17 @@ function depositEnergyToSpawnOrExtensionAction() {
     this.name = constants.ACTION_DEPOSIT_ENERGY_TO_SPAWN_OR_EXTENSION;
 }
 
+function buildWorker() {
+    this.preconditions = [
+        new goapState.state(goapState.const.STATE_ROOM_HAS_ENOUGH_ENERGY_FOR_A_WORKER, true)
+    ];
+    this.postconditions = [
+        new goapState.state(goapState.const.STATE_ROOM_HAS_A_WORKER, true)
+    ];
+    this.cost = 1;
+    this.name = constants.ACTION_BUILD_WORKER;
+}
+
 var getAllActionNames = function() {
     var actionNames = [];
     _.each(constants, function(action) {
@@ -92,6 +104,7 @@ actions[constants.ACTION_FIND_ACTIVE_SOURCE] = findActiveSourceAction;
 actions[constants.ACTION_FIND_NON_FULL_SPAWN_OR_EXTENSION] = findNonFullSpawnOrExtensionAction;
 actions[constants.ACTION_HARVEST_SOURCE] = harvestSourceAction;
 actions[constants.ACTION_DEPOSIT_ENERGY_TO_SPAWN_OR_EXTENSION] = depositEnergyToSpawnOrExtensionAction;
+actions[constants.ACTION_BUILD_WORKER] = buildWorker;
 
 module.exports = {
     const : constants,

@@ -33,6 +33,7 @@ var formulatePlan = function(startStateArr, desiredStateArr, allowedActionsArr) 
         }
     });
 
+    console.log("Plan result: " + plan);
     if(foundPlan) {
         return plan;
     } else {
@@ -40,12 +41,12 @@ var formulatePlan = function(startStateArr, desiredStateArr, allowedActionsArr) 
     }
 }
 
-var wipePlan = function(creep) {
-    creep.memory.activeSource = undefined;
-    creep.memory.nonFullSpawnOrExtension = undefined;
+var wipePlan = function(object) {
+    object.memory.activeSource = undefined;
+    object.memory.nonFullSpawnOrExtension = undefined;
 
-    creep.memory.plan = [];
-    creep.memory.desiredState = [];
+    object.memory.plan = [];
+    object.memory.desiredState = [];
 }
 
 module.exports = {

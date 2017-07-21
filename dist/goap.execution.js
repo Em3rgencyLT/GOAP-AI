@@ -1,5 +1,6 @@
 var goapAction = require('goap.action');
 var goapPlan = require('goap.plan');
+var creepBody = require('creep.body');
 
 var findActiveSourceExecution = function (creep) {
     if(creep.memory.plan[0] !== goapAction.const.ACTION_FIND_ACTIVE_SOURCE) {
@@ -16,6 +17,8 @@ var findActiveSourceExecution = function (creep) {
         if(!activeSource) {
             goapPlan.wipePlan(creep);
             return;
+        } else {
+            creep.memory.activeSource = activeSource.id;
         }
     }
 
@@ -24,6 +27,7 @@ var findActiveSourceExecution = function (creep) {
         return;
     } else {
         creep.moveTo(activeSource);
+        //TODO if can't moveTo, should find different source
     }
 }
 
@@ -67,10 +71,9 @@ var harvestSourceExecution = function(creep) {
 
     switch(result) {
         case OK:
-            return;
-            break;
-        case ERR_FULL:
-            creep.memory.plan.shift();
+            if(_.sum(creep.carry) === creep.carryCapacity) {
+                creep.memory.plan.shift();
+            }
             return;
             break;
         case ERR_NOT_ENOUGH_ENERGY:
@@ -108,13 +111,23 @@ var depositEnergyToSpawnOrExtensionExecution = function(creep) {
     }
 }
 
+var buildWorker = function(spawn) {
+    var result = spawn.createCreep(creepBody.WORKER_TIER_I.body);
+    if(_.isString(result)) {
+        spawn.memory.plan.shift();
+        return;
+    } else {
+        goapPlan.wipePlan(spawn);
+    }
+}
+
 var executions = {};
-executions[constants.ACTION_FIND_ACTIVE_SOURCE] = findActiveSourceExecution;
-executions[constants.ACTION_FIND_NON_FULL_SPAWN_OR_EXTENSION] = findNonFullSpawnOrExtensionExecution;
-executions[constants.ACTION_HARVEST_SOURCE] = harvestSourceExecution;
-executions[constants.ACTION_DEPOSIT_ENERGY_TO_SPAWN_OR_EXTENSION] = depositEnergyToSpawnOrExtensionExecution;
+executions[goapAction.const.ACTION_FIND_ACTIVE_SOURCE] = findActiveSourceExecution;
+executions[goapAction.const.ACTION_FIND_NON_FULL_SPAWN_OR_EXTENSION] = findNonFullSpawnOrExtensionExecution;
+executions[goapAction.const.ACTION_HARVEST_SOURCE] = harvestSourceExecution;
+executions[goapAction.const.ACTION_DEPOSIT_ENERGY_TO_SPAWN_OR_EXTENSION] = depositEnergyToSpawnOrExtensionExecution;
+executions[goapAction.const.ACTION_BUILD_WORKER] = buildWorker;
 
 module.exports = {
-    const : constants,
-    executions : executions
+    executions : executions,
 }

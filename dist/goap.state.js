@@ -6,7 +6,9 @@ var constants = {
     STATE_ACTOR_FULL_ENERGY : 'actorFullEnergy',
     STATE_SPAWN_AND_EXTENSION_ENERGY_FULL : 'spawnAndExtensionEnergyFull',
     STATE_ACTOR_FOUND_ACTIVE_SOURCE : 'actorFoundActiveSource',
-    STATE_ACTOR_FOUND_NON_FULL_SPAWN_OR_EXTENSION : 'actorFoundNonFullSpawnOrExtension'
+    STATE_ACTOR_FOUND_NON_FULL_SPAWN_OR_EXTENSION : 'actorFoundNonFullSpawnOrExtension',
+    STATE_ROOM_HAS_A_WORKER : 'roomHasAWorker',
+    STATE_ROOM_HAS_ENOUGH_ENERGY_FOR_A_WORKER : 'roomHasEnoughEnergyForAWorker'
 }
 
 var goapState = function (name, value) {
@@ -15,30 +17,32 @@ var goapState = function (name, value) {
 }
 
 var areConditionsMet = function(desiredStateArr, currentStateArr) {
-    var conditionsMet = true;
-    _.each(desiredStateArr, function(requiredState) {
-        var found = false;
+    var allConditionsMet = true;
+    _.each(desiredStateArr, function(desiredState) {
+        var foundValue = false;
+        var thisConditionMet = false;
         _.each(currentStateArr, function(currentState){
-            if(requiredState.name === currentState.name) {
-                found = true;
-                if(requiredState.value !== currentState.value) {
-                    conditionsMet = false;
+            if(desiredState.name == currentState.name) {
+                foundValue = true;
+                if(desiredState.value === currentState.value) {
+                    thisConditionMet = true;
+                    return;
                 }
             }
         });
 
-        if(!found && requiredState.value === false) {
-            conditionsMet = true;
-            return;
+        //if a value is false, it's often ommited. If the requirement is that a value is false if it wasn't found means that its false.
+        if(!foundValue && desiredStateArr.value == false) {
+            thisConditionMet = true;
         }
 
-        if(!conditionsMet || !found) {
-            conditionsMet = false;
+        if(!foundValue || !thisConditionMet) {
+            allConditionsMet = false;
             return;
         }
     });
-
-    return conditionsMet;
+    console.log("Plan condition check: " + allConditionsMet);
+    return allConditionsMet;
 }
 
 var getRoomStateArr = function(room) {
@@ -47,6 +51,17 @@ var getRoomStateArr = function(room) {
     if(room.energyAvailable === room.energyCapacityAvailable) {
         stateArr.push(new goapState(constants.STATE_SPAWN_AND_EXTENSION_ENERGY_FULL, true));
     }
+
+    if(room.energyAvailable >= 250) {
+        stateArr.push(new goapState(constants.STATE_ROOM_HAS_ENOUGH_ENERGY_FOR_A_WORKER, true));
+    }
+
+    _.each(room.find(FIND_MY_CREEPS), function(creep) {
+        if(creep.getActiveBodyparts(MOVE) > 0 && creep.getActiveBodyparts(CARRY) > 0 && creep.getActiveBodyparts(WORK) > 0) {
+            stateArr.push(new goapState(constants.STATE_ROOM_HAS_A_WORKER, true));
+            return;
+        }
+    });
 
     return stateArr;
 }
