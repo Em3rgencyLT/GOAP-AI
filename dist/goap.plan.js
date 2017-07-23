@@ -33,7 +33,7 @@ var formulatePlan = function(startStateArr, desiredStateArr, allowedActionsArr) 
         }
     });
 
-    console.log("Plan result: " + plan);
+    //console.log("Plan result: " + plan);
     if(foundPlan) {
         return plan;
     } else {

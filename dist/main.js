@@ -18,15 +18,18 @@ module.exports.loop = function () {
                 var allowedActions = [
                     goapAction.const.ACTION_BUILD_WORKER
                 ];
-                //spawnObject.memory.plan = goapPlan.formulatePlan(room.state, desiredState, allowedActions);
+				var currentState = room.state.concat(spawnObject.memory.state);
+				
+                spawnObject.memory.plan = goapPlan.formulatePlan(currentState, desiredState, allowedActions);
             }
         });
 
         _.each(room.creeps, function(creep) {
             var creepObject = Game.creeps[creep];
+
             if(creepObject.memory.plan && creepObject.memory.plan.length > 0) {
+				//console.log(creepObject.name + " is executing a plan.");
                 executePlan(creepObject);
-                console.log(creepObject.name + " is executing a plan.");
             } else {
                 var desiredState = [
                     new goapState.state(goapState.const.STATE_SPAWN_AND_EXTENSION_ENERGY_FULL, true)
@@ -34,7 +37,7 @@ module.exports.loop = function () {
                 var allowedActions = goapAction.getAllActionNames();
                 var currentState = room.state.concat(creepObject.memory.state);
 
-                console.log(creepObject.name + " is formulating a plan.");
+                //console.log(creepObject.name + " is formulating a plan.");
                 creepObject.memory.plan = goapPlan.formulatePlan(currentState, desiredState, allowedActions);
             }
         });
@@ -49,6 +52,7 @@ function updateMemory() {
         Memory.rooms[room.name].spawns = [];
         Memory.rooms[room.name].creeps = [];
         _.each(Game.spawns, function(spawn) {
+			spawn.memory.state = goapState.getSpawnStateArr(spawn);
             if(spawn.room.name === room.name) {
                 Memory.rooms[room.name].spawns.push(spawn.name);
             }
@@ -72,6 +76,9 @@ function executePlan(object) {
     if(object.memory.plan && object.memory.plan.length > 0) {
         var functionName = object.memory.plan[0];
         goapExecution.executions[functionName](object);
+		if(object.memory.plan.length === 0) {
+			goapPlan.wipePlan(object);
+		}
     } else {
         return;
     }

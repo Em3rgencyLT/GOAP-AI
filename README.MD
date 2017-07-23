@@ -1,34 +1,21 @@
 GOAP-AI implementation for Screeps
 =================================
 
+## Requirements
+NodeJS with NPM
+
 ## Installation
 Install grunt if you don't have it
 
 `npm install -g grunt-cli`
 
+Install NPM modules
 
-Create your package.json file
-
-`npm init`
-
-
-Add grunt to the project
-
-`npm install grunt --save-dev`
-
-Add underscoreJS to the project
-
-`npm install underscore --save-dev`
-
-
-Add grunt-screeps to the project
-
-`npm install grunt-screeps --save-dev`
-
+`npm install`
 
 Create and edit your Gruntfile.js with your screeps credentials
 
-`mv Gruntfile.js.dist Gruntfile.js`
+`cp Gruntfile.js.dist Gruntfile.js`
 
 `nano Gruntfile.js`
 

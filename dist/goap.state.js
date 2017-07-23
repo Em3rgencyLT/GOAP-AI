@@ -8,7 +8,8 @@ var constants = {
     STATE_ACTOR_FOUND_ACTIVE_SOURCE : 'actorFoundActiveSource',
     STATE_ACTOR_FOUND_NON_FULL_SPAWN_OR_EXTENSION : 'actorFoundNonFullSpawnOrExtension',
     STATE_ROOM_HAS_A_WORKER : 'roomHasAWorker',
-    STATE_ROOM_HAS_ENOUGH_ENERGY_FOR_A_WORKER : 'roomHasEnoughEnergyForAWorker'
+    STATE_ROOM_HAS_ENOUGH_ENERGY_FOR_A_WORKER : 'roomHasEnoughEnergyForAWorker',
+	STATE_ACTOR_IS_SPAWN: 'actorIsSpawn',
 }
 
 var goapState = function (name, value) {
@@ -32,16 +33,16 @@ var areConditionsMet = function(desiredStateArr, currentStateArr) {
         });
 
         //if a value is false, it's often ommited. If the requirement is that a value is false if it wasn't found means that its false.
-        if(!foundValue && desiredStateArr.value == false) {
+        if(!foundValue && desiredState.value == false) {
             thisConditionMet = true;
         }
 
-        if(!foundValue || !thisConditionMet) {
+        if(!thisConditionMet) {
+			//console.log("Failed condition: " + desiredState.name);
             allConditionsMet = false;
             return;
         }
     });
-    console.log("Plan condition check: " + allConditionsMet);
     return allConditionsMet;
 }
 
@@ -68,6 +69,8 @@ var getRoomStateArr = function(room) {
 
 var getCreepStateArr = function(creep) {
     var stateArr = [];
+	
+	stateArr.push(new goapState(constants.STATE_ACTOR_IS_SPAWN, false));
 
     var moveParts = _.filter(creep.body, function(bodyPart) {
         return bodyPart.type === MOVE;
@@ -110,10 +113,19 @@ var getCreepStateArr = function(creep) {
     return stateArr;
 }
 
+var getSpawnStateArr = function(creep) {
+    var stateArr = [];
+	
+	stateArr.push(new goapState(constants.STATE_ACTOR_IS_SPAWN, true));
+
+    return stateArr;
+}
+
 module.exports = {
     state : goapState,
     const : constants,
     areConditionsMet : areConditionsMet,
     getRoomStateArr : getRoomStateArr,
-    getCreepStateArr : getCreepStateArr
+    getCreepStateArr : getCreepStateArr,
+	getSpawnStateArr : getSpawnStateArr
 }

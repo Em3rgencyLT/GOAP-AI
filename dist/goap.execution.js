@@ -44,11 +44,13 @@ var findNonFullSpawnOrExtensionExecution = function(creep) {
         var nonFullSpawnOrExtensions = creep.room.find(FIND_MY_STRUCTURES, {filter : function(structure) {
             return (structure.structureType === STRUCTURE_SPAWN || structure.structureType === STRUCTURE_EXTENSION) && structure.energy < structure.energyCapacity;
         }});
-        nonFullSpawnOrExtension = creep.pos.findClosestByPath(nonFullSpawnOrExtension);
+        nonFullSpawnOrExtension = creep.pos.findClosestByPath(nonFullSpawnOrExtensions);
         if(!nonFullSpawnOrExtension) {
             goapPlan.wipePlan(creep);
             return;
-        }
+        } else {
+			creep.memory.nonFullSpawnOrExtension = nonFullSpawnOrExtension.id;
+		}
     }
 
     if(creep.pos.isNearTo(nonFullSpawnOrExtension)) {
@@ -56,6 +58,7 @@ var findNonFullSpawnOrExtensionExecution = function(creep) {
         return;
     } else {
         creep.moveTo(nonFullSpawnOrExtension);
+		//TODO if can't moveTo, should find different source
     }
 }
 

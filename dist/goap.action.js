@@ -9,7 +9,9 @@ var constants = {
 }
 
 function findActiveSourceAction() {
-    this.preconditions = [];
+    this.preconditions = [
+		new goapState.state(goapState.const.STATE_ACTOR_FULL_ENERGY, false),
+	];
     this.postconditions = [
         new goapState.state(goapState.const.STATE_ACTOR_FOUND_ACTIVE_SOURCE, true)
     ];
@@ -58,7 +60,8 @@ function depositEnergyToSpawnOrExtensionAction() {
 
 function buildWorker() {
     this.preconditions = [
-        new goapState.state(goapState.const.STATE_ROOM_HAS_ENOUGH_ENERGY_FOR_A_WORKER, true)
+        new goapState.state(goapState.const.STATE_ROOM_HAS_ENOUGH_ENERGY_FOR_A_WORKER, true),
+		new goapState.state(goapState.const.STATE_ACTOR_IS_SPAWN, true)
     ];
     this.postconditions = [
         new goapState.state(goapState.const.STATE_ROOM_HAS_A_WORKER, true)
