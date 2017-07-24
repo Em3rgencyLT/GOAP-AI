@@ -3,7 +3,7 @@ var goapAction = require('goap.action');
 
 var formulatePlan = function(startStateArr, desiredStateArr, allowedActionsArr) {
     var plan = [];
-
+	
     var currentStateArr = startStateArr;
     var foundPlan = false;
     _.each(allowedActionsArr, function(actionName, index) {
@@ -12,6 +12,7 @@ var formulatePlan = function(startStateArr, desiredStateArr, allowedActionsArr) 
         }
         var result = goapAction.applyActionToState(currentStateArr, actionName);
         if(result !== false) {
+			console.log("Pushing " + actionName);
             plan.push(actionName);
             currentStateArr = result;
             var conditionsAreMet = goapState.areConditionsMet(desiredStateArr, currentStateArr);
@@ -19,6 +20,7 @@ var formulatePlan = function(startStateArr, desiredStateArr, allowedActionsArr) 
                 foundPlan = true;
                 return;
             } else {
+				console.log("Incomplete plan after " + actionName);
                 var newAllowedActions = allowedActionsArr;
                 newAllowedActions.splice(index, 1);
                 if(newAllowedActions.length >= 1) {
@@ -30,10 +32,19 @@ var formulatePlan = function(startStateArr, desiredStateArr, allowedActionsArr) 
                     }
                 }
             }
-        }
+        } else {
+			console.log("Not pushing " + actionName);
+			if(actionName == "upgradeController") {
+				_.each(currentStateArr, function(state) {
+					console.log("state: " + state.name + " value: " + state.value);
+				});
+			}
+		}
     });
 
-    //console.log("Plan result: " + plan);
+	if(!foundPlan) {
+		console.log("Failed plan result: " + plan);
+	}
     if(foundPlan) {
         return plan;
     } else {

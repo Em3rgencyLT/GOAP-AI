@@ -1,4 +1,5 @@
 var WORKER_TIER_I = {'body' : [WORK, CARRY, MOVE, MOVE], 'cost' : 250};
+//TODO auto calculate cost function using BODYPART_COST[BODY_CONSTANT] constant
 
 var MAX_ENERGY_TIER_I = 300;
 var MAX_ENERGY_TIER_II = 550;

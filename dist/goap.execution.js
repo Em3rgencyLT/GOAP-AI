@@ -62,6 +62,37 @@ var findNonFullSpawnOrExtensionExecution = function(creep) {
     }
 }
 
+var findNonEmptySpawnOrExtensionExecution = function(creep) {
+    if(creep.memory.plan[0] !== goapAction.const.ACTION_FIND_NON_EMPTY_SPAWN_OR_EXTENSION) {
+        Game.notify(creep + " is in findNonEmptySpawnOrExtensionExecution, when plan is " + creep.memory.plan);
+        console.log(creep + " is in findNonEmptySpawnOrExtensionExecution, when plan is " + creep.memory.plan);
+        return;
+    }
+
+    var nonEmptySpawnOrExtension = Game.getObjectById(creep.memory.nonEmptySpawnOrExtension);
+
+    if(!nonEmptySpawnOrExtension || (!(nonEmptySpawnOrExtension instanceof StructureSpawn) && !(nonEmptySpawnOrExtension instanceof StructureExtension)) || nonEmptySpawnOrExtension.energy === 0) {
+        var nonEmptySpawnOrExtensions = creep.room.find(FIND_MY_STRUCTURES, {filter : function(structure) {
+            return (structure.structureType === STRUCTURE_SPAWN || structure.structureType === STRUCTURE_EXTENSION) && structure.energy > 0;
+        }});
+        nonEmptySpawnOrExtension = creep.pos.findClosestByPath(nonEmptySpawnOrExtensions);
+        if(!nonEmptySpawnOrExtension) {
+            goapPlan.wipePlan(creep);
+            return;
+        } else {
+			creep.memory.nonEmptySpawnOrExtension = nonEmptySpawnOrExtension.id;
+		}
+    }
+
+    if(creep.pos.isNearTo(nonEmptySpawnOrExtension)) {
+        creep.memory.plan.shift();
+        return;
+    } else {
+        creep.moveTo(nonEmptySpawnOrExtension);
+		//TODO if can't moveTo, should find different source
+    }
+}
+
 var harvestSourceExecution = function(creep) {
     if(creep.memory.plan[0] !== goapAction.const.ACTION_HARVEST_SOURCE) {
         Game.notify(creep + " is in harvestSourceExecution, when plan is " + creep.memory.plan);
@@ -74,17 +105,14 @@ var harvestSourceExecution = function(creep) {
 
     switch(result) {
         case OK:
-            if(_.sum(creep.carry) === creep.carryCapacity) {
+			//need to stop 1 tick earlier to leave full and not waste any
+            if(_.sum(creep.carry) + creep.memory.bodyCounts[WORK]*HARVEST_POWER === creep.carryCapacity) {
                 creep.memory.plan.shift();
             }
-            return;
             break;
         case ERR_NOT_ENOUGH_ENERGY:
             creep.memory.activeSource = undefined;
-            if (creep.carry.energy > 0) {
-                creep.memory.plan.shift();
-                return;
-            }
+			creep.memory.plan.shift();
             break;
         default:
             goapPlan.wipePlan(creep);
@@ -114,6 +142,28 @@ var depositEnergyToSpawnOrExtensionExecution = function(creep) {
     }
 }
 
+var withdrawEnergyFromSpawnOrExtensionExecution = function(creep) {
+    if(creep.memory.plan[0] !== goapAction.const.ACTION_WITHDRAW_ENERGY_FROM_SPAWN_OR_EXTENSION) {
+        Game.notify(creep + " is in withdrawEnergyFromSpawnOrExtensionExecution, when plan is " + creep.memory.plan);
+        console.log(creep + " is in withdrawEnergyFromSpawnOrExtensionExecution, when plan is " + creep.memory.plan);
+        return;
+    }
+
+    var nonEmptySpawnOrExtension = Game.getObjectById(creep.memory.nonEmptySpawnOrExtension);
+
+    var result = creep.withdraw(nonEmptySpawnOrExtension, RESOURCE_ENERGY);
+
+    switch(result) {
+        case OK:
+            creep.memory.plan.shift();
+            return;
+            break;
+        default:
+            goapPlan.wipePlan(creep);
+            break;
+    }
+}
+
 var buildWorker = function(spawn) {
     var result = spawn.createCreep(creepBody.WORKER_TIER_I.body);
     if(_.isString(result)) {
@@ -127,8 +177,10 @@ var buildWorker = function(spawn) {
 var executions = {};
 executions[goapAction.const.ACTION_FIND_ACTIVE_SOURCE] = findActiveSourceExecution;
 executions[goapAction.const.ACTION_FIND_NON_FULL_SPAWN_OR_EXTENSION] = findNonFullSpawnOrExtensionExecution;
+executions[goapAction.const.ACTION_FIND_NON_EMPTY_SPAWN_OR_EXTENSION] = findNonEmptySpawnOrExtensionExecution;
 executions[goapAction.const.ACTION_HARVEST_SOURCE] = harvestSourceExecution;
 executions[goapAction.const.ACTION_DEPOSIT_ENERGY_TO_SPAWN_OR_EXTENSION] = depositEnergyToSpawnOrExtensionExecution;
+executions[goapAction.const.ACTION_WITHDRAW_ENERGY_FROM_SPAWN_OR_EXTENSION] = withdrawEnergyFromSpawnOrExtensionExecution;
 executions[goapAction.const.ACTION_BUILD_WORKER] = buildWorker;
 
 module.exports = {
