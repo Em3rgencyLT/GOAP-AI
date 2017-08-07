@@ -2,6 +2,7 @@ var goapState = require('goap.state');
 var goapAction = require('goap.action');
 var goapPlan = require('goap.plan');
 var goapExecution = require('goap.execution');
+var astarSearch = require('astar.search');
 
 module.exports.loop = function () {
     updateMemory();
@@ -43,6 +44,11 @@ module.exports.loop = function () {
                 
                 var allowedActions = goapAction.getAllActionNames();
                 var currentState = room.state.concat(creepObject.memory.state);
+
+                _.each(allowedActions, function(actionName){
+                    var action = new goapAction.actions[actionName];
+                    console.log(actionName + " " + astarSearch.calculateHeuristic(currentState, desiredState, action.postconditions));
+                });
 
                 //console.log(creepObject.name + " is formulating a plan.");
                 creepObject.memory.plan = goapPlan.formulatePlan(currentState, desiredState, allowedActions);
