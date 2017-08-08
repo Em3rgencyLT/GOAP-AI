@@ -27,7 +27,7 @@ function findNonFullSpawnOrExtensionAction() {
     this.postconditions = [
         new goapState.state(goapState.const.STATE_ACTOR_FOUND_NON_FULL_SPAWN_OR_EXTENSION, true)
     ];
-    this.cost = 1;
+    this.cost = 3;
     this.name = constants.ACTION_FIND_NON_FULL_SPAWN_OR_EXTENSION;
 }
 
@@ -36,7 +36,7 @@ function findNonEmptySpawnOrExtensionAction() {
     this.postconditions = [
         new goapState.state(goapState.const.STATE_ACTOR_FOUND_NON_EMPTY_SPAWN_OR_EXTENSION, true)
     ];
-    this.cost = 1;
+    this.cost = 3;
     this.name = constants.ACTION_FIND_NON_EMPTY_SPAWN_OR_EXTENSION;
 }
 
@@ -71,7 +71,7 @@ function withdrawEnergyFromSpawnOrExtensionAction() {
 		new goapState.state(goapState.const.STATE_ROOM_HAS_ENOUGH_ENERGY_FOR_A_WORKER, false),
         new goapState.state(goapState.const.STATE_SPAWN_AND_EXTENSION_ENERGY_FULL, false)
     ];
-    this.cost = 1;
+    this.cost = 2;
     this.name = constants.ACTION_WITHDRAW_ENERGY;
 }
 
@@ -89,7 +89,7 @@ function depositEnergyToSpawnOrExtensionAction() {
 		new goapState.state(goapState.const.STATE_ROOM_HAS_ENOUGH_ENERGY_FOR_A_WORKER, true),
         new goapState.state(goapState.const.STATE_SPAWN_AND_EXTENSION_ENERGY_FULL, true)
     ];
-    this.cost = 1;
+    this.cost = 2;
     this.name = constants.ACTION_DEPOSIT_ENERGY_TO_SPAWN_OR_EXTENSION;
 }
 
@@ -127,6 +127,18 @@ var getAllActionNames = function() {
     _.each(constants, function(action) {
         actionNames.push(action);
     });
+    return actionNames;
+}
+
+var getPossibleActionNames = function(currentStateArr) {
+    var actionNames = [];
+    _.each(actions, function(constructor, name) {
+        var action = new constructor();
+        if(goapState.areConditionsMet(action.preconditions, currentStateArr)) {
+            actionNames.push(name);
+        }
+    });
+
     return actionNames;
 }
 
@@ -168,5 +180,6 @@ module.exports = {
     const : constants,
     actions : actions,
     getAllActionNames : getAllActionNames,
+    getPossibleActionNames: getPossibleActionNames,
     applyActionToState : applyActionToState
 }

@@ -140,6 +140,27 @@ var containsIdenticalState = function(stateArr, needle) {
 	return found;
 }
 
+var stateArraysAreIdentical = function (firstArr, secondArr) {
+    if (firstArr.length !== secondArr.length) {
+        return false;
+    }
+
+    var identical = true;
+    _.every(firstArr, function(firstElement) {
+        var copy = _.filter(secondArr, function(secondElement) {
+            return secondElement.name === firstElement.name && secondElement.value === firstElement.value
+        });
+        if(copy.length > 0) {
+            return true;
+        } else {
+            identical = false;
+            return false;
+        }
+
+    });
+    return identical;
+}
+
 module.exports = {
     state : goapState,
     const : constants,
@@ -148,4 +169,5 @@ module.exports = {
     getCreepStateArr : getCreepStateArr,
 	getSpawnStateArr : getSpawnStateArr,
 	containsIdenticalState : containsIdenticalState,
+    stateArraysAreIdentical : stateArraysAreIdentical
 }

@@ -1,5 +1,4 @@
 var goapAction = require('goap.action');
-var goapPlan = require('goap.plan');
 var creepBody = require('creep.body');
 
 var findActiveSourceExecution = function (creep) {
@@ -15,7 +14,7 @@ var findActiveSourceExecution = function (creep) {
         var activeSources = creep.room.find(FIND_SOURCES_ACTIVE);
         activeSource = creep.pos.findClosestByPath(activeSources);
         if(!activeSource) {
-            goapPlan.wipePlan(creep);
+            wipePlan(creep);
             return;
         } else {
             creep.memory.activeSource = activeSource.id;
@@ -46,7 +45,7 @@ var findNonFullSpawnOrExtensionExecution = function(creep) {
         }});
         nonFullSpawnOrExtension = creep.pos.findClosestByPath(nonFullSpawnOrExtensions);
         if(!nonFullSpawnOrExtension) {
-            goapPlan.wipePlan(creep);
+            wipePlan(creep);
             return;
         } else {
 			creep.memory.nonFullSpawnOrExtension = nonFullSpawnOrExtension.id;
@@ -77,7 +76,7 @@ var findNonEmptySpawnOrExtensionExecution = function(creep) {
         }});
         nonEmptySpawnOrExtension = creep.pos.findClosestByPath(nonEmptySpawnOrExtensions);
         if(!nonEmptySpawnOrExtension) {
-            goapPlan.wipePlan(creep);
+            wipePlan(creep);
             return;
         } else {
 			creep.memory.nonEmptySpawnOrExtension = nonEmptySpawnOrExtension.id;
@@ -115,7 +114,7 @@ var harvestSourceExecution = function(creep) {
 			creep.memory.plan.shift();
             break;
         default:
-            goapPlan.wipePlan(creep);
+            wipePlan(creep);
             break;
     }
 }
@@ -137,7 +136,7 @@ var depositEnergyToSpawnOrExtensionExecution = function(creep) {
             return;
             break;
         default:
-            goapPlan.wipePlan(creep);
+            wipePlan(creep);
             break;
     }
 }
@@ -159,7 +158,7 @@ var withdrawEnergyFromSpawnOrExtensionExecution = function(creep) {
             return;
             break;
         default:
-            goapPlan.wipePlan(creep);
+            wipePlan(creep);
             break;
     }
 }
@@ -170,8 +169,16 @@ var buildWorker = function(spawn) {
         spawn.memory.plan.shift();
         return;
     } else {
-        goapPlan.wipePlan(spawn);
+        wipePlan(spawn);
     }
+}
+
+var wipePlan = function(object) {
+    object.memory.activeSource = undefined;
+    object.memory.nonFullSpawnOrExtension = undefined;
+
+    object.memory.plan = [];
+    object.memory.desiredState = [];
 }
 
 var executions = {};

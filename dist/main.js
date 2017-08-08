@@ -1,6 +1,5 @@
 var goapState = require('goap.state');
 var goapAction = require('goap.action');
-var goapPlan = require('goap.plan');
 var goapExecution = require('goap.execution');
 var astarSearch = require('astar.search');
 
@@ -16,12 +15,10 @@ module.exports.loop = function () {
                 var desiredState = [
                     new goapState.state(goapState.const.STATE_ROOM_HAS_A_WORKER, true)
                 ];
-                var allowedActions = [
-                    goapAction.const.ACTION_BUILD_WORKER
-                ];
+
 				var currentState = room.state.concat(spawnObject.memory.state);
 				
-                spawnObject.memory.plan = goapPlan.formulatePlan(currentState, desiredState, allowedActions);
+                spawnObject.memory.plan = astarSearch.searchForPlan(currentState, desiredState);
             }
         });
 
@@ -41,17 +38,11 @@ module.exports.loop = function () {
 						new goapState.state(goapState.const.STATE_ROOM_CONTROLLER_IS_MAX_LEVEL, true)
 					];
 				}
-                
-                var allowedActions = goapAction.getAllActionNames();
+
                 var currentState = room.state.concat(creepObject.memory.state);
 
-                _.each(allowedActions, function(actionName){
-                    var action = new goapAction.actions[actionName];
-                    console.log(actionName + " " + astarSearch.calculateHeuristic(currentState, desiredState, action.postconditions));
-                });
-
                 //console.log(creepObject.name + " is formulating a plan.");
-                creepObject.memory.plan = goapPlan.formulatePlan(currentState, desiredState, allowedActions);
+                creepObject.memory.plan = astarSearch.searchForPlan(currentState, desiredState);
             }
         });
     });
