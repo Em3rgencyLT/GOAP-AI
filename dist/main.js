@@ -1,9 +1,12 @@
 var goapState = require('goap.state');
 var goapExecution = require('goap.execution');
 var astarSearch = require('astar.search');
+var creepBody = require('creep.body');
 
 module.exports.loop = function () {
     updateMemory();
+
+    console.log(creepBody.getBestBody(0).body.toString());
 
     _.each(Memory.rooms, function(room) {
         _.each(room.spawns, function(spawn) {
