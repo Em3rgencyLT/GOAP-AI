@@ -46,19 +46,27 @@ var searchForPlan = function (currentStateArr, goalStateArr) {
     var openList = [];
     var closedList = [];
     var plan = [];
+    var nodeList = [];
+
+    if(goapState.areConditionsMet(goalStateArr, currentStateArr)) {
+        //Don't need to do anything
+        return plan;
+    }
 
     var node0 = new astarNode();
     node0.stateArr = currentStateArr;
     node0.parentNode = -1;
     openList.push(node0);
+    nodeList.push(node0);
 
-    while(openList.length > 0) {
+    while(openList.length) {
         var currentNode = findLowestFNode(openList);
-        var index = openList.indexOf(currentNode);
-        openList.splice(index, 1);
+        var openIndex = _.findIndex(openList, currentNode);
+        var index = _.findIndex(nodeList, currentNode);
+        openList.splice(openIndex, 1);
 
         if(goapState.areConditionsMet(goalStateArr, currentNode.stateArr)) {
-            plan = buildPlan(openList, index);
+            plan = buildPlan(nodeList, index);
             break;
         }
         closedList.push(currentNode);
@@ -69,15 +77,19 @@ var searchForPlan = function (currentStateArr, goalStateArr) {
             node.actionName = actionName;
             var actionObject = new goapAction.actions[actionName]();
             var cost = currentNode.g + actionObject.cost;
-            var openListId = _.findIndex(openList, node);
-            var closedListId = _.findIndex(openList, node);
+            var openListId = _.findIndex(openList, function(element) {
+                return element.actionName == node.actionName && goapState.stateArraysAreIdentical(element.stateArr, node.stateArr)
+            });
+            var closedListId = _.findIndex(closedList, function(element) {
+                return element.actionName == node.actionName && goapState.stateArraysAreIdentical(element.stateArr, node.stateArr)
+            });
 
-            if(openListId > 0 && cost < openList[openListId].g) {
+            if(openListId != -1 && cost < openList[openListId].g) {
                 openList.splice(openListId, 1);
                 openListId = -1;
             }
 
-            if(closedListId > 0 && cost < closedList[closedListId].g) {
+            if(closedListId != -1 && cost < closedList[closedListId].g) {
                 closedList.splice(closedListId, 1);
                 closedListId = -1;
             }
@@ -86,10 +98,11 @@ var searchForPlan = function (currentStateArr, goalStateArr) {
                 node.h = calculateHeuristic(node.stateArr, goalStateArr, actionName);
                 node.f = node.g + node.h;
                 openList.push(node);
+                nodeList.push(node);
             }
         });
     }
-
+    //console.log("Came up with plan " + plan.toString());
     return plan;
 }
 
@@ -100,13 +113,13 @@ var findLowestFNode = function (list) {
     return minNode;
 }
 
-var buildPlan = function (openList, index) {
+var buildPlan = function (list, index) {
     var plan = [];
     while(index > 0) {
-        plan.push(openList[index].actionName);
-        index = openList[index].parentNode;
+        plan.push(list[index].actionName);
+        index = list[index].parentNode;
     }
-    return plan;
+    return plan.reverse();
 }
 
 

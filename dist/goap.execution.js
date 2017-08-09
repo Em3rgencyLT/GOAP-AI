@@ -173,6 +173,25 @@ var buildWorker = function(spawn) {
     }
 }
 
+var upgradeController = function (creep) {
+    if(creep.room.controller) {
+        var result = creep.upgradeController(creep.room.controller);
+        switch(result) {
+            case OK:
+                if(_.sum(creep.carry.energy === creep.memory.bodyCounts[WORK]*UPGRADE_CONTROLLER_POWER) ) {
+                    creep.memory.plan.shift();
+                }
+                break;
+            case ERR_NOT_IN_RANGE:
+                creep.moveTo(creep.room.controller);
+                break;
+            default:
+                wipePlan(creep);
+                break;
+        }
+    }
+}
+
 var wipePlan = function(object) {
     object.memory.activeSource = undefined;
     object.memory.nonFullSpawnOrExtension = undefined;
@@ -189,7 +208,9 @@ executions[goapAction.const.ACTION_HARVEST_SOURCE] = harvestSourceExecution;
 executions[goapAction.const.ACTION_DEPOSIT_ENERGY_TO_SPAWN_OR_EXTENSION] = depositEnergyToSpawnOrExtensionExecution;
 executions[goapAction.const.ACTION_WITHDRAW_ENERGY_FROM_SPAWN_OR_EXTENSION] = withdrawEnergyFromSpawnOrExtensionExecution;
 executions[goapAction.const.ACTION_BUILD_WORKER] = buildWorker;
+executions[goapAction.const.ACTION_UPGRADE_CONTROLLER] = upgradeController;
 
 module.exports = {
     executions : executions,
+    wipePlan: wipePlan
 }

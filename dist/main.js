@@ -1,5 +1,4 @@
 var goapState = require('goap.state');
-var goapAction = require('goap.action');
 var goapExecution = require('goap.execution');
 var astarSearch = require('astar.search');
 
@@ -11,13 +10,12 @@ module.exports.loop = function () {
             var spawnObject = Game.spawns[spawn];
             if(spawnObject.memory.plan && spawnObject.memory.plan.length > 0) {
                 executePlan(spawnObject);
-            } else {
+            } else if (!spawnObject.spawning) {
                 var desiredState = [
                     new goapState.state(goapState.const.STATE_ROOM_HAS_A_WORKER, true)
                 ];
 
 				var currentState = room.state.concat(spawnObject.memory.state);
-				
                 spawnObject.memory.plan = astarSearch.searchForPlan(currentState, desiredState);
             }
         });
@@ -88,7 +86,7 @@ function executePlan(object) {
         var functionName = object.memory.plan[0];
         goapExecution.executions[functionName](object);
 		if(object.memory.plan.length === 0) {
-			goapPlan.wipePlan(object);
+			goapExecution.wipePlan(object);
 		}
     } else {
         return;

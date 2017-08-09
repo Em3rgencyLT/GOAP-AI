@@ -69,7 +69,7 @@ var getRoomStateArr = function(room) {
     _.every(room.find(FIND_MY_CREEPS), function(creep) {
         if(creep.getActiveBodyparts(MOVE) > 0 && creep.getActiveBodyparts(CARRY) > 0 && creep.getActiveBodyparts(WORK) > 0) {
 			//console.log('Time: ' + Game.time + ' adding worker state.');
-            stateArr.push(new goapState(constants.STATE_ROOM_HAS_A_WORKER, true));
+            //stateArr.push(new goapState(constants.STATE_ROOM_HAS_A_WORKER, true));
             return false;
         }
 		

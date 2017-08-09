@@ -107,7 +107,6 @@ function buildWorker() {
 
 function upgradeController() {
     this.preconditions = [
-        new goapState.state(goapState.const.STATE_ROOM_HAS_A_WORKER, true),
 		new goapState.state(goapState.const.STATE_ACTOR_NO_ENERGY, false),
 		new goapState.state(goapState.const.STATE_ROOM_CONTROLLER_IS_MAX_LEVEL, false),
 		new goapState.state(goapState.const.STATE_ACTOR_HAS_CARRY, true),
@@ -148,7 +147,8 @@ var applyActionToState = function(stateArr, actionName) {
         return false;
     }
 
-    var newStateArr = stateArr;
+    //clone the array
+    var newStateArr = JSON.parse(JSON.stringify(stateArr));;
     _.each(action.postconditions, function(stateToAdd) {
         var found = false;
         _.each(newStateArr, function(stateToCheck) {
