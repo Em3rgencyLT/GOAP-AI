@@ -49,9 +49,14 @@ var getBestBody = function(capacity, type = constants.BODY_TYPE_WORKER) {
     return _.max(_.filter(partList, function(candidate) {return candidate.cost <= capacity}), 'cost');
 }
 
+var getCheapestWorkerCost = function() {
+    return _.min(workers, 'cost').cost;
+}
+
 module.exports = {
     const : constants,
     getBestBody: getBestBody,
+    getCheapestWorkerCost : getCheapestWorkerCost,
     workers,
     MAX_ENERGY_TIER_I,
     MAX_ENERGY_TIER_II,

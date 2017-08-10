@@ -48,7 +48,7 @@ var searchForPlan = function (currentStateArr, goalStateArr) {
     var plan = [];
     var nodeList = [];
 
-    if(goapState.areConditionsMet(goalStateArr, currentStateArr)) {
+    if(goalStateArr.length < 1 || goapState.areConditionsMet(goalStateArr, currentStateArr)) {
         //Don't need to do anything
         return plan;
     }

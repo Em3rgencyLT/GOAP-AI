@@ -1,19 +1,5 @@
-var constants = {
-    STATE_ACTOR_HAS_MOVE : 'actorHasMove',
-    STATE_ACTOR_HAS_CARRY : 'actorHasCarry',
-    STATE_ACTOR_HAS_WORK : 'actorHasWork',
-    STATE_ACTOR_NO_ENERGY : 'actorNoEnergy',
-    STATE_ACTOR_FULL_ENERGY : 'actorFullEnergy',
-    STATE_SPAWN_AND_EXTENSION_ENERGY_FULL : 'spawnAndExtensionEnergyFull',
-    STATE_ACTOR_FOUND_ACTIVE_SOURCE : 'actorFoundActiveSource',
-    STATE_ACTOR_FOUND_NON_FULL_SPAWN_OR_EXTENSION : 'actorFoundNonFullSpawnOrExtension',
-	STATE_ACTOR_FOUND_NON_EMPTY_SPAWN_OR_EXTENSION : 'actorFoundNonEmptySpawnOrExtension',
-    STATE_ROOM_HAS_A_WORKER : 'roomHasAWorker',
-	STATE_ROOM_HAS_ENERGY: 'roomHasEnergy',
-    STATE_ROOM_HAS_ENOUGH_ENERGY_FOR_A_WORKER : 'roomHasEnoughEnergyForAWorker',
-	STATE_ACTOR_IS_SPAWN: 'actorIsSpawn',
-	STATE_ROOM_CONTROLLER_IS_MAX_LEVEL: 'roomControllerIsMaxLevel',
-}
+var creepBody = require('creep.body');
+var constants = require('goap.constants').constants;
 
 var goapState = function (name, value) {
     this.name = name;
@@ -58,7 +44,7 @@ var getRoomStateArr = function(room) {
         stateArr.push(new goapState(constants.STATE_SPAWN_AND_EXTENSION_ENERGY_FULL, true));
     }
 
-    if(room.energyAvailable >= 250) {
+    if(room.energyAvailable >= creepBody.getCheapestWorkerCost()) {
         stateArr.push(new goapState(constants.STATE_ROOM_HAS_ENOUGH_ENERGY_FOR_A_WORKER, true));
     }
 	
@@ -66,15 +52,31 @@ var getRoomStateArr = function(room) {
         stateArr.push(new goapState(constants.STATE_ROOM_HAS_ENERGY, true));
     }
 
+    var checkHasWorker = true;
+    var checkHasHarvestingSource = true;
     _.every(room.find(FIND_MY_CREEPS), function(creep) {
-        if(creep.getActiveBodyparts(MOVE) > 0 && creep.getActiveBodyparts(CARRY) > 0 && creep.getActiveBodyparts(WORK) > 0) {
+        if(checkHasWorker && creep.getActiveBodyparts(MOVE) > 0 && creep.getActiveBodyparts(CARRY) > 0 && creep.getActiveBodyparts(WORK) > 0) {
 			//console.log('Time: ' + Game.time + ' adding worker state.');
-            //stateArr.push(new goapState(constants.STATE_ROOM_HAS_A_WORKER, true));
+            stateArr.push(new goapState(constants.STATE_ROOM_HAS_A_WORKER, true));
+            checkHasWorker = false;
+        }
+
+        //we don't care if a creep is mining energy for this condition, we care if energy is actually getting deposited
+        if(checkHasHarvestingSource && creep.memory.plan.includes(constants.ACTION_DEPOSIT_ENERGY_TO_SPAWN_OR_EXTENSION)) {
+            stateArr.push(new goapState(constants.STATE_ROOM_HAS_ACTORS_HARVESTING_ENERGY, true));
+            checkHasHarvestingSource = false;
+        }
+
+        if(checkHasWorker || checkHasHarvestingSource) {
+            return true;
+        } else {
             return false;
         }
-		
-		return true;
     });
+
+    if(room.find(FIND_SOURCES).length) {
+        stateArr.push(new goapState(constants.STATE_ROOM_HAS_A_SOURCE, true));
+    }
 	
 	if(room.controller && room.controller.level < 8) {
 		stateArr.push(new goapState(constants.STATE_ROOM_CONTROLLER_IS_MAX_LEVEL, false));
@@ -163,7 +165,6 @@ var stateArraysAreIdentical = function (firstArr, secondArr) {
 
 module.exports = {
     state : goapState,
-    const : constants,
     areConditionsMet : areConditionsMet,
     getRoomStateArr : getRoomStateArr,
     getCreepStateArr : getCreepStateArr,

@@ -1,12 +1,11 @@
 var goapState = require('goap.state');
 var goapExecution = require('goap.execution');
 var astarSearch = require('astar.search');
-var creepBody = require('creep.body');
+var goalSet = require('goap.goalSet');
+var constants = require('goap.constants').constants;
 
 module.exports.loop = function () {
     updateMemory();
-
-    console.log(creepBody.getBestBody(0).body.toString());
 
     _.each(Memory.rooms, function(room) {
         _.each(room.spawns, function(spawn) {
@@ -14,12 +13,9 @@ module.exports.loop = function () {
             if(spawnObject.memory.plan && spawnObject.memory.plan.length > 0) {
                 executePlan(spawnObject);
             } else if (!spawnObject.spawning) {
-                var desiredState = [
-                    new goapState.state(goapState.const.STATE_ROOM_HAS_A_WORKER, true)
-                ];
-
 				var currentState = room.state.concat(spawnObject.memory.state);
-                spawnObject.memory.plan = astarSearch.searchForPlan(currentState, desiredState);
+                var goal = goalSet.getNextGoal(currentState, constants.GOAL_SET_SPAWN);
+                spawnObject.memory.plan = astarSearch.searchForPlan(currentState, goal);
             }
         });
 
@@ -30,13 +26,13 @@ module.exports.loop = function () {
 				//console.log(creepObject.name + " is executing a plan.");
                 executePlan(creepObject);
             } else {
-				if(index % 2 == 0) {
+				if(index % 2 == 1) {
 					var desiredState = [
-						new goapState.state(goapState.const.STATE_SPAWN_AND_EXTENSION_ENERGY_FULL, true)
+						new goapState.state(constants.STATE_SPAWN_AND_EXTENSION_ENERGY_FULL, true)
 					];
 				} else {
 					var desiredState = [
-						new goapState.state(goapState.const.STATE_ROOM_CONTROLLER_IS_MAX_LEVEL, true)
+						new goapState.state(constants.STATE_ROOM_CONTROLLER_IS_MAX_LEVEL, true)
 					];
 				}
 
