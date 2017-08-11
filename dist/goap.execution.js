@@ -1,4 +1,5 @@
 var creepBody = require('creep.body');
+var miscelaneous = require('miscelaneous');
 var constants = require('goap.constants').constants;
 
 var findActiveSourceExecution = function (creep) {
@@ -13,6 +14,37 @@ var findActiveSourceExecution = function (creep) {
     if(!activeSource || !(activeSource instanceof Source) || activeSource.energy === 0) {
         var activeSources = creep.room.find(FIND_SOURCES_ACTIVE);
         activeSource = creep.pos.findClosestByPath(activeSources);
+        if(!activeSource) {
+            wipePlan(creep);
+            return;
+        } else {
+            creep.memory.activeSource = activeSource.id;
+        }
+    }
+
+    if(creep.pos.isNearTo(activeSource)) {
+        creep.memory.plan.shift();
+        return;
+    } else {
+        creep.moveTo(activeSource);
+        //TODO if can't moveTo, should find different source
+    }
+}
+
+var findActiveNonFullyTappedSourceExecution = function (creep) {
+    var activeSource = Game.getObjectById(creep.memory.activeSource);
+
+    if(!activeSource || !(activeSource instanceof Source) || activeSource.energy === 0) {
+        var activeSources = creep.room.find(FIND_SOURCES_ACTIVE);
+        var nonTappedActiveSources = [];
+        _.each(activeSources, function(source) {
+            var needsWorkParts = miscelaneous.getSourceMaxWorkPartCount(source);
+            var hasWorkParts = miscelaneous.getSourceWorkPartCount(source);
+            if(hasWorkParts < needsWorkParts) {
+                nonTappedActiveSources.push(source);
+            }
+        });
+        activeSource = creep.pos.findClosestByPath(nonTappedActiveSources);
         if(!activeSource) {
             wipePlan(creep);
             return;
@@ -209,6 +241,7 @@ var wipePlan = function(object) {
 
 var executions = {};
 executions[constants.ACTION_FIND_ACTIVE_SOURCE] = findActiveSourceExecution;
+executions[constants.ACTION_FIND_ACTIVE_NON_FULLY_TAPPED_SOURCE] = findActiveNonFullyTappedSourceExecution;
 executions[constants.ACTION_FIND_NON_FULL_SPAWN_OR_EXTENSION] = findNonFullSpawnOrExtensionExecution;
 executions[constants.ACTION_FIND_NON_EMPTY_SPAWN_OR_EXTENSION] = findNonEmptySpawnOrExtensionExecution;
 executions[constants.ACTION_HARVEST_SOURCE] = harvestSourceExecution;

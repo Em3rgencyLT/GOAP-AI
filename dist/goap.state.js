@@ -1,4 +1,5 @@
 var creepBody = require('creep.body');
+var miscelaneous = require('miscelaneous');
 var constants = require('goap.constants').constants;
 
 var goapState = function (name, value) {
@@ -74,8 +75,30 @@ var getRoomStateArr = function(room) {
         }
     });
 
+    var sources = room.find(FIND_SOURCES);
     if(room.find(FIND_SOURCES).length) {
         stateArr.push(new goapState(constants.STATE_ROOM_HAS_A_SOURCE, true));
+
+        var allTapped = true;
+        _.every(sources, function(source) {
+            if(!Memory.rooms[room.name].sources[source.id].hasAjacentFreeSpace) {
+                return true;
+            }
+
+            var workPartsNeeds = miscelaneous.getSourceMaxWorkPartCount(source);
+            var workPartsHas = miscelaneous.getSourceWorkPartCount(source, workPartsNeeds);
+
+            if(workPartsHas < workPartsNeeds) {
+                allTapped = false;
+                return false;
+            }
+
+            return true;
+        });
+
+        if(allTapped) {
+            stateArr.push(new goapState(constants.STATE_ROOM_HAS_ALL_SOURCES_TAPPED, true));
+        }
     }
 	
 	if(room.controller && room.controller.level < 8) {

@@ -15,9 +15,11 @@ var constants = {
     STATE_ROOM_HAS_ENOUGH_ENERGY_FOR_A_WORKER : 'roomHasEnoughEnergyForAWorker',
 	STATE_ROOM_CONTROLLER_IS_MAX_LEVEL: 'roomControllerIsMaxLevel',
     STATE_ROOM_HAS_ACTORS_HARVESTING_ENERGY: 'roomHasActorsHarvestingEnergy',
+    STATE_ROOM_HAS_ALL_SOURCES_TAPPED: 'roomHasAllSourcesTapped',
     STATE_SPAWN_AND_EXTENSION_ENERGY_FULL : 'spawnAndExtensionEnergyFull',
 
     ACTION_FIND_ACTIVE_SOURCE : 'findActiveSource',
+    ACTION_FIND_ACTIVE_NON_FULLY_TAPPED_SOURCE : 'findActiveNonFullyTappedSource',
     ACTION_HARVEST_SOURCE : 'harvestSource',
     ACTION_WITHDRAW_ENERGY_FROM_SPAWN_OR_EXTENSION: 'withdrawEnergyFromSpawnOrExtension',
     ACTION_DEPOSIT_ENERGY_TO_SPAWN_OR_EXTENSION : 'depositEnergyToSpawnOrExtension',

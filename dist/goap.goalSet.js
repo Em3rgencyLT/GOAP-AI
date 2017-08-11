@@ -37,6 +37,16 @@ spawnerGoalSet.push({
     ]
 });
 
+spawnerGoalSet.push({
+    'description' : 'Have all energy sources fully tapped',
+    'requirements' : [
+        new goapState.state(constants.STATE_ROOM_HAS_ALL_SOURCES_TAPPED, false),
+    ],
+    'goal' : [
+        new goapState.state(constants.STATE_ROOM_HAS_MORE_WORKERS, true),
+    ]
+});
+
 
 
 module.exports = {

@@ -2,6 +2,7 @@ var goapState = require('goap.state');
 var goapExecution = require('goap.execution');
 var astarSearch = require('astar.search');
 var goalSet = require('goap.goalSet');
+var miscelaneous = require('miscelaneous');
 var constants = require('goap.constants').constants;
 
 module.exports.loop = function () {
@@ -49,9 +50,16 @@ function updateMemory() {
     Memory.rooms = {};
     _.each(Game.rooms, function(room) {
         Memory.rooms[room.name] = {}
-        Memory.rooms[room.name].state = goapState.getRoomStateArr(room);
         Memory.rooms[room.name].spawns = [];
+        Memory.rooms[room.name].sources = {};
         Memory.rooms[room.name].creeps = [];
+
+        _.each(room.find(FIND_SOURCES), function (source) {
+            Memory.rooms[room.name].sources[source.id] = {};
+            Memory.rooms[room.name].sources[source.id].hasAjacentFreeSpace = miscelaneous.getObjectHasAdjacentSpace(source);
+        })
+
+        Memory.rooms[room.name].state = goapState.getRoomStateArr(room);
     });
 	
 	_.each(Game.creeps, function(creep) {

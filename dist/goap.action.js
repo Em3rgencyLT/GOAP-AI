@@ -9,6 +9,18 @@ function findActiveSourceAction() {
     this.postconditions = [
         new goapState.state(constants.STATE_ACTOR_FOUND_ACTIVE_SOURCE, true)
     ];
+    this.cost = 3;
+    this.name = constants.ACTION_FIND_ACTIVE_SOURCE;
+}
+
+function findActiveNonFullyTappedSourceAction() {
+    this.preconditions = [
+        new goapState.state(constants.STATE_ACTOR_FULL_ENERGY, false),
+        new goapState.state(constants.STATE_ROOM_HAS_ALL_SOURCES_TAPPED, false)
+    ];
+    this.postconditions = [
+        new goapState.state(constants.STATE_ACTOR_FOUND_ACTIVE_SOURCE, true)
+    ];
     this.cost = 1;
     this.name = constants.ACTION_FIND_ACTIVE_SOURCE;
 }
@@ -160,6 +172,7 @@ var applyActionToState = function(stateArr, actionName) {
 
 var actions = {};
 actions[constants.ACTION_FIND_ACTIVE_SOURCE] = findActiveSourceAction;
+actions[constants.ACTION_FIND_ACTIVE_NON_FULLY_TAPPED_SOURCE] = findActiveNonFullyTappedSourceAction,
 actions[constants.ACTION_FIND_NON_EMPTY_SPAWN_OR_EXTENSION] = findNonEmptySpawnOrExtensionAction;
 actions[constants.ACTION_FIND_NON_FULL_SPAWN_OR_EXTENSION] = findNonFullSpawnOrExtensionAction;
 actions[constants.ACTION_HARVEST_SOURCE] = harvestSourceAction;
